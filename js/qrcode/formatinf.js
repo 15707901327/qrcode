@@ -1,8 +1,8 @@
 /*
-  Ported to JavaScript by Lazar Laszlo 2011 
-  
+  Ported to JavaScript by Lazar Laszlo 2011
+
   lazarsoft@gmail.com, www.lazarsoft.info
-  
+
 */
 
 /*
@@ -100,5 +100,3 @@ FormatInformation.doDecodeFormatInformation=function( maskedFormatInfo)
 	}
 	return null;
 }
-
-		

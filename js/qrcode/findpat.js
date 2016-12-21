@@ -1,8 +1,8 @@
 /*
-  Ported to JavaScript by Lazar Laszlo 2011 
-  
+  Ported to JavaScript by Lazar Laszlo 2011
+
   lazarsoft@gmail.com, www.lazarsoft.info
-  
+
 */
 
 /*
@@ -28,15 +28,16 @@ var MAX_MODULES = 57;
 var INTEGER_MATH_SHIFT = 8;
 var CENTER_QUORUM = 2;
 
-qrcode.orderBestPatterns = function(patterns){
-			
+qrcode.orderBestPatterns=function(patterns)
+		{
+
 			function distance( pattern1,  pattern2)
 			{
 				xDiff = pattern1.X - pattern2.X;
 				yDiff = pattern1.Y - pattern2.Y;
 				return  Math.sqrt( (xDiff * xDiff + yDiff * yDiff));
 			}
-			
+
 			/// <summary> Returns the z component of the cross product between vectors BC and BA.</summary>
 			function crossProductZ( pointA,  pointB,  pointC)
 			{
@@ -45,12 +46,12 @@ qrcode.orderBestPatterns = function(patterns){
 				return ((pointC.x - bX) * (pointA.y - bY)) - ((pointC.y - bY) * (pointA.x - bX));
 			}
 
-			
+
 			// Find distances between pattern centers
 			var zeroOneDistance = distance(patterns[0], patterns[1]);
 			var oneTwoDistance = distance(patterns[1], patterns[2]);
 			var zeroTwoDistance = distance(patterns[0], patterns[2]);
-			
+
 			var pointA, pointB, pointC;
 			// Assume one closest to other two is B; A and C will just be guesses at first
 			if (oneTwoDistance >= zeroOneDistance && oneTwoDistance >= zeroTwoDistance)
@@ -71,7 +72,7 @@ qrcode.orderBestPatterns = function(patterns){
 				pointA = patterns[0];
 				pointC = patterns[1];
 			}
-			
+
 			// Use cross product to figure out whether A and C are correct or flipped.
 			// This asks whether BC x BA has a positive z component, which is the arrangement
 			// we want for A, B, C. If it's negative, then we've got it flipped around and
@@ -82,22 +83,24 @@ qrcode.orderBestPatterns = function(patterns){
 				pointA = pointC;
 				pointC = temp;
 			}
-			
+
 			patterns[0] = pointA;
 			patterns[1] = pointB;
 			patterns[2] = pointC;
-		};
+		}
 
-function FinderPattern(posX, posY,  estimatedModuleSize) {
+
+function FinderPattern(posX, posY,  estimatedModuleSize)
+{
 	this.x=posX;
 	this.y=posY;
 	this.count = 1;
 	this.estimatedModuleSize = estimatedModuleSize;
-	
+
 	this.__defineGetter__("EstimatedModuleSize", function()
 	{
 		return this.estimatedModuleSize;
-	}); 
+	});
 	this.__defineGetter__("Count", function()
 	{
 		return this.count;
@@ -123,69 +126,78 @@ function FinderPattern(posX, posY,  estimatedModuleSize) {
 			}
 			return false;
 		}
-	
+
 }
 
-function FinderPatternInfo(patternCenters) {
+function FinderPatternInfo(patternCenters)
+{
 	this.bottomLeft = patternCenters[0];
 	this.topLeft = patternCenters[1];
 	this.topRight = patternCenters[2];
 	this.__defineGetter__("BottomLeft", function()
 	{
 		return this.bottomLeft;
-	}); 
+	});
 	this.__defineGetter__("TopLeft", function()
 	{
 		return this.topLeft;
-	}); 
+	});
 	this.__defineGetter__("TopRight", function()
 	{
 		return this.topRight;
-	}); 
+	});
 }
 
-function FinderPatternFinder() {
-	this.image = null;
+function FinderPatternFinder()
+{
+	this.image=null;
 	this.possibleCenters = [];
 	this.hasSkipped = false;
 	this.crossCheckStateCount = new Array(0,0,0,0,0);
 	this.resultPointCallback = null;
-	
-	this.__defineGetter__("CrossCheckStateCount", function() {
+
+	this.__defineGetter__("CrossCheckStateCount", function()
+	{
 		this.crossCheckStateCount[0] = 0;
 		this.crossCheckStateCount[1] = 0;
 		this.crossCheckStateCount[2] = 0;
 		this.crossCheckStateCount[3] = 0;
 		this.crossCheckStateCount[4] = 0;
 		return this.crossCheckStateCount;
-	}); 
-	
-	this.foundPatternCross = function( stateCount) {
-		var totalModuleSize = 0;
-		for (var i = 0; i < 5; i++) {
-			var count = stateCount[i];
-			if (count == 0) {
+	});
+
+	this.foundPatternCross=function( stateCount)
+		{
+			var totalModuleSize = 0;
+			for (var i = 0; i < 5; i++)
+			{
+				var count = stateCount[i];
+				if (count == 0)
+				{
+					return false;
+				}
+				totalModuleSize += count;
+			}
+			if (totalModuleSize < 7)
+			{
 				return false;
 			}
-			totalModuleSize += count;
+			var moduleSize = Math.floor((totalModuleSize << INTEGER_MATH_SHIFT) / 7);
+			var maxVariance = Math.floor(moduleSize / 2);
+			// Allow less than 50% variance from 1-1-3-1-1 proportions
+			return Math.abs(moduleSize - (stateCount[0] << INTEGER_MATH_SHIFT)) < maxVariance && Math.abs(moduleSize - (stateCount[1] << INTEGER_MATH_SHIFT)) < maxVariance && Math.abs(3 * moduleSize - (stateCount[2] << INTEGER_MATH_SHIFT)) < 3 * maxVariance && Math.abs(moduleSize - (stateCount[3] << INTEGER_MATH_SHIFT)) < maxVariance && Math.abs(moduleSize - (stateCount[4] << INTEGER_MATH_SHIFT)) < maxVariance;
 		}
-		if (totalModuleSize < 7) {
-			return false;
-		}
-		var moduleSize = Math.floor((totalModuleSize << INTEGER_MATH_SHIFT) / 7);
-		var maxVariance = Math.floor(moduleSize / 2);
-		// Allow less than 50% variance from 1-1-3-1-1 proportions
-		return Math.abs(moduleSize - (stateCount[0] << INTEGER_MATH_SHIFT)) < maxVariance && Math.abs(moduleSize - (stateCount[1] << INTEGER_MATH_SHIFT)) < maxVariance && Math.abs(3 * moduleSize - (stateCount[2] << INTEGER_MATH_SHIFT)) < 3 * maxVariance && Math.abs(moduleSize - (stateCount[3] << INTEGER_MATH_SHIFT)) < maxVariance && Math.abs(moduleSize - (stateCount[4] << INTEGER_MATH_SHIFT)) < maxVariance;
-	};
-	this.centerFromEnd = function( stateCount,  end) {
+	this.centerFromEnd=function( stateCount,  end)
+		{
 			return  (end - stateCount[4] - stateCount[3]) - stateCount[2] / 2.0;
-		};
-	this.crossCheckVertical = function( startI,  centerJ,  maxCount,  originalStateCountTotal) {
+		}
+	this.crossCheckVertical=function( startI,  centerJ,  maxCount,  originalStateCountTotal)
+		{
 			var image = this.image;
-			
+
 			var maxI = qrcode.height;
 			var stateCount = this.CrossCheckStateCount;
-			
+
 			// Start counting up from center
 			var i = startI;
 			while (i >= 0 && image[centerJ + i*qrcode.width])
@@ -216,7 +228,7 @@ function FinderPatternFinder() {
 			{
 				return NaN;
 			}
-			
+
 			// Now also count down from center
 			i = startI + 1;
 			while (i < maxI && image[centerJ +i*qrcode.width])
@@ -246,7 +258,7 @@ function FinderPatternFinder() {
 			{
 				return NaN;
 			}
-			
+
 			// If we found a finder-pattern-like section, but its size is more than 40% different than
 			// the original, assume it's a false positive
 			var stateCountTotal = stateCount[0] + stateCount[1] + stateCount[2] + stateCount[3] + stateCount[4];
@@ -254,15 +266,16 @@ function FinderPatternFinder() {
 			{
 				return NaN;
 			}
-			
+
 			return this.foundPatternCross(stateCount)?this.centerFromEnd(stateCount, i):NaN;
-		};
-	this.crossCheckHorizontal = function( startJ,  centerI,  maxCount, originalStateCountTotal) {
+		}
+	this.crossCheckHorizontal=function( startJ,  centerI,  maxCount, originalStateCountTotal)
+		{
 			var image = this.image;
-			
+
 			var maxJ = qrcode.width;
 			var stateCount = this.CrossCheckStateCount;
-			
+
 			var j = startJ;
 			while (j >= 0 && image[j+ centerI*qrcode.width])
 			{
@@ -291,7 +304,7 @@ function FinderPatternFinder() {
 			{
 				return NaN;
 			}
-			
+
 			j = startJ + 1;
 			while (j < maxJ && image[j+ centerI*qrcode.width])
 			{
@@ -320,7 +333,7 @@ function FinderPatternFinder() {
 			{
 				return NaN;
 			}
-			
+
 			// If we found a finder-pattern-like section, but its size is significantly different than
 			// the original, assume it's a false positive
 			var stateCountTotal = stateCount[0] + stateCount[1] + stateCount[2] + stateCount[3] + stateCount[4];
@@ -328,10 +341,11 @@ function FinderPatternFinder() {
 			{
 				return NaN;
 			}
-			
+
 			return this.foundPatternCross(stateCount)?this.centerFromEnd(stateCount, j):NaN;
-		};
-	this.handlePossibleCenter = function( stateCount,  i,  j) {
+		}
+	this.handlePossibleCenter=function( stateCount,  i,  j)
+		{
 			var stateCountTotal = stateCount[0] + stateCount[1] + stateCount[2] + stateCount[3] + stateCount[4];
 			var centerJ = this.centerFromEnd(stateCount, j); //float
 			var centerI = this.crossCheckVertical(i, Math.floor( centerJ), stateCount[2], stateCountTotal); //float
@@ -368,17 +382,18 @@ function FinderPatternFinder() {
 				}
 			}
 			return false;
-		};
-		
-	this.selectBestPatterns = function() {
-			
+		}
+
+	this.selectBestPatterns=function()
+		{
+
 			var startSize = this.possibleCenters.length;
 			if (startSize < 3)
 			{
 				// Couldn't find enough finder patterns
 				throw "Couldn't find enough finder patterns";
 			}
-			
+
 			// Filter outlier possibilities whose module size is too different
 			if (startSize > 3)
 			{
@@ -418,7 +433,7 @@ function FinderPatternFinder() {
 					}
 				}
 			}
-			
+
 			if (this.possibleCenters.length > 3)
 			{
 				// Throw away all but those first size candidate points we found.
@@ -428,11 +443,12 @@ function FinderPatternFinder() {
 					return 0;
 				});
 			}
-			
+
 			return new Array( this.possibleCenters[0],  this.possibleCenters[1],  this.possibleCenters[2]);
-		};
-		
-	this.findRowSkip = function() {
+		}
+
+	this.findRowSkip=function()
+		{
 			var max = this.possibleCenters.length;
 			if (max <= 1)
 			{
@@ -461,9 +477,10 @@ function FinderPatternFinder() {
 				}
 			}
 			return 0;
-		};
-	
-	this.haveMultiplyConfirmedCenters = function() {
+		}
+
+	this.haveMultiplyConfirmedCenters=function()
+		{
 			var confirmedCount = 0;
 			var totalModuleSize = 0.0;
 			var max = this.possibleCenters.length;
@@ -492,22 +509,23 @@ function FinderPatternFinder() {
 				totalDeviation += Math.abs(pattern.EstimatedModuleSize - average);
 			}
 			return totalDeviation <= 0.05 * totalModuleSize;
-		};
-		
+		}
+
 	this.findFinderPattern = function(image){
 		var tryHarder = false;
-		this.image = image;
+		this.image=image;
 		var maxI = qrcode.height;
 		var maxJ = qrcode.width;
 		var iSkip = Math.floor((3 * maxI) / (4 * MAX_MODULES));
-		if (iSkip < MIN_SKIP || tryHarder) {
-			iSkip = MIN_SKIP;
+		if (iSkip < MIN_SKIP || tryHarder)
+		{
+				iSkip = MIN_SKIP;
 		}
-		
+
 		var done = false;
 		var stateCount = new Array(5);
-		//根据图片宽度遍历2、5、8....
-		for (var i = iSkip - 1; i < maxI && !done; i += iSkip) {
+		for (var i = iSkip - 1; i < maxI && !done; i += iSkip)
+		{
 			// Get a row of black/white values
 			stateCount[0] = 0;
 			stateCount[1] = 0;
@@ -515,40 +533,50 @@ function FinderPatternFinder() {
 			stateCount[3] = 0;
 			stateCount[4] = 0;
 			var currentState = 0;
-			//根据图片高度遍历0、1、2、3....
-			for (var j = 0; j < maxJ; j++) {
-				if (image[j + i * qrcode.width] ) {
+			for (var j = 0; j < maxJ; j++)
+			{
+				if (image[j+i*qrcode.width] )
+				{
 					// Black pixel
-					if ((currentState & 1) == 1) {
+					if ((currentState & 1) == 1)
+					{
 						// Counting white pixels
 						currentState++;
 					}
 					stateCount[currentState]++;
 				}
-				else {
+				else
+				{
 					// White pixel
-					if ((currentState & 1) == 0) {
+					if ((currentState & 1) == 0)
+					{
 						// Counting black pixels
-						if (currentState == 4) {
+						if (currentState == 4)
+						{
 							// A winner?
-							if (this.foundPatternCross(stateCount)) {
+							if (this.foundPatternCross(stateCount))
+							{
 								// Yes
 								var confirmed = this.handlePossibleCenter(stateCount, i, j);
-								if (confirmed) {
+								if (confirmed)
+								{
 									// Start examining every other line. Checking each line turned out to be too
 									// expensive and didn't improve performance.
 									iSkip = 2;
-									if (this.hasSkipped) {
+									if (this.hasSkipped)
+									{
 										done = this.haveMultiplyConfirmedCenters();
 									}
-									else {
+									else
+									{
 										var rowSkip = this.findRowSkip();
-										if (rowSkip > stateCount[2]) {
+										if (rowSkip > stateCount[2])
+										{
 											// Skip rows between row of lower confirmed center
 											// and top of presumed third confirmed center
 											// but back up a bit to get a full chance of detecting
 											// it, entire width of center of finder pattern
-											
+
 											// Skip by rowSkip, but back off by stateCount[2] (size of last center
 											// of pattern we saw) to be conservative, and also back off by iSkip which
 											// is about to be re-added
@@ -557,11 +585,14 @@ function FinderPatternFinder() {
 										}
 									}
 								}
-								else {
+								else
+								{
 									// Advance to next black pixel
-									do {
+									do
+									{
 										j++;
-									} while (j < maxJ && !image[j + i*qrcode.width]);
+									}
+									while (j < maxJ && !image[j + i*qrcode.width]);
 									j--; // back up to that last white pixel
 								}
 								// Clear state to start looking again
@@ -572,7 +603,8 @@ function FinderPatternFinder() {
 								stateCount[3] = 0;
 								stateCount[4] = 0;
 							}
-							else {
+							else
+							{
 								// No, shift counts back by two
 								stateCount[0] = stateCount[2];
 								stateCount[1] = stateCount[3];
@@ -581,31 +613,37 @@ function FinderPatternFinder() {
 								stateCount[4] = 0;
 								currentState = 3;
 							}
-						} else {
+						}
+						else
+						{
 							stateCount[++currentState]++;
 						}
 					}
-					else {
+					else
+					{
 						// Counting white pixels
 						stateCount[currentState]++;
 					}
 				}
 			}
-			if (this.foundPatternCross(stateCount)) {
+			if (this.foundPatternCross(stateCount))
+			{
 				var confirmed = this.handlePossibleCenter(stateCount, i, maxJ);
-				if (confirmed) {
+				if (confirmed)
+				{
 					iSkip = stateCount[0];
-					if (this.hasSkipped) {
+					if (this.hasSkipped)
+					{
 						// Found a third one
 						done = haveMultiplyConfirmedCenters();
 					}
 				}
 			}
 		}
-		
+
 		var patternInfo = this.selectBestPatterns();
 		qrcode.orderBestPatterns(patternInfo);
-		
+
 		return new FinderPatternInfo(patternInfo);
 	};
 }
