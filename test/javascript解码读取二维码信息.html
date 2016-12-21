@@ -2,25 +2,26 @@
 <head>
 	<meta http-equiv="content-type" content="txt/html;charset=utf-8" />
 	<title>javascript解码读取二维码信息</title>
-	<script type="text/javascript" src="../js/grid.js"></script>
-	<script type="text/javascript" src="../js/version.js"></script>
-	<script type="text/javascript" src="../js/detector.js"></script>
-	<script type="text/javascript" src="../js/formatinf.js"></script>
-	<script type="text/javascript" src="../js/errorlevel.js"></script>
-	<script type="text/javascript" src="../js/bitmat.js"></script>
-	<script type="text/javascript" src="../js/datablock.js"></script>
-	<script type="text/javascript" src="../js/bmparser.js"></script>
-	<script type="text/javascript" src="../js/datamask.js"></script>
-	<script type="text/javascript" src="../js/rsdecoder.js"></script>
-	<script type="text/javascript" src="../js/gf256poly.js"></script>
-	<script type="text/javascript" src="../js/gf256.js"></script>
-	<script type="text/javascript" src="../js/decoder.js"></script>
-	<script type="text/javascript" src="../js/qrcode.js"></script>
-	<script type="text/javascript" src="../js/findpat.js"></script>
-	<script type="text/javascript" src="../js/alignpat.js"></script>
-	<script type="text/javascript" src="../js/databr.js"></script>
+	<script type="text/javascript" src="../js/qrcode/grid.js"></script>
+	<script type="text/javascript" src="../js/qrcode/version.js"></script>
+	<script type="text/javascript" src="../js/qrcode/detector.js"></script>
+	<script type="text/javascript" src="../js/qrcode/formatinf.js"></script>
+	<script type="text/javascript" src="../js/qrcode/errorlevel.js"></script>
+	<script type="text/javascript" src="../js/qrcode/bitmat.js"></script>
+	<script type="text/javascript" src="../js/qrcode/datablock.js"></script>
+	<script type="text/javascript" src="../js/qrcode/bmparser.js"></script>
+	<script type="text/javascript" src="../js/qrcode/datamask.js"></script>
+	<script type="text/javascript" src="../js/qrcode/rsdecoder.js"></script>
+	<script type="text/javascript" src="../js/qrcode/gf256poly.js"></script>
+	<script type="text/javascript" src="../js/qrcode/gf256.js"></script>
+	<script type="text/javascript" src="../js/qrcode/decoder.js"></script>
+	<script type="text/javascript" src="../js/qrcode/qrcode.js"></script>
+	<script type="text/javascript" src="../js/qrcode/findpat.js"></script>
+	<script type="text/javascript" src="../js/qrcode/alignpat.js"></script>
+	<script type="text/javascript" src="../js/qrcode/databr.js"></script>
 
 	<script type="text/javascript">
+		/**二维码的图片大写最小是200*200*/
 		var gCtx = null;
 		var gCanvas = null;
 
@@ -125,7 +126,5 @@
 <body>
 	将二维码图片拖放到下面的黑色框框内解码获取信息<br />
 	<canvas id="qr-canvas" width="640" height="480" style="border:solid 1px #000"></canvas>
-
-	<img src="../img/qr2.png">
 </body>
 </html>
